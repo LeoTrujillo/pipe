@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+  <style type="text/css">
+  #pipe{
+    width: 900px;
+    height: 1000px;
+    margin:0 auto;
+    display: block;
+  }
+  </style>
+  <script type="text/javascript" src="snap.svg-min.js"></script>
+  <script type="text/javascript">
+(function() {
+        Snap.plugin( function( Snap, Element, Paper, global ) {
+
+    Element.prototype.drawAtPath = function( path, timer, options) {
+
+      var myObject = this, bbox = this.getBBox(1);
+      var point, movePoint = {}, len = path.getTotalLength(), from = 0, to = len, drawpath = 0, easing = mina.linear, callback;
+      var startingTransform = ''; 
+
+      if( options ) {
+        easing = options.easing || easing;
+        if( options.reverse  ) { from = len; to = 0; };
+        if( options.drawpath ) {
+          drawpath = 1;
+          path.attr({    
+            fill: "none",
+                                                strokeDasharray: len + " " + len,
+                                                strokeDashoffset: this.len
+                                  });
+
+        };
+        if( options.startingTransform ) {
+          startingTransform = options.startingTransform;
+        };
+        callback = options.callback || function() {};
+      };
+
+      Snap.animate(from, to , function( val ) {
+              point = path.getPointAtLength( val );
+            movePoint.x = point.x - bbox.cx; movePoint.y = point.y - bbox.cy;
+            myObject.transform( startingTransform + 't' + movePoint.x + ',' + movePoint.y + 'r' + point.alpha);
+
+        if( drawpath ) {
+          path.attr({ "stroke-dashoffset": len - val });
+        };
+        }, timer, easing, callback ); 
+    };
+  });
+
+})();
+  </script>
+  <script type="text/javascript">
+  window.onload = function (){
+    var s = Snap("#pipe");
+
+//var path = s.path("M 50 50 v 0 200 c 0 100 100 100 100 100 h 0 900 c 300 10 -100 100 -100 100 h 0 -800 c 0 100 100 100 100 100 h 0 800 c 0 100 -100 100 -100 100 h 0 -700 c -200 70 100 100 100 100 v 0 200").attr({ fill: "none", stroke: "#BBBCC0",strokeWidth: 30, opacity: "1" });
+
+var path = s.path("M 50 50 v 0 200 h 0 800 v 0 100 h 0 -800 v 0 100 h 0 800 v 0 100 h 0 -800 v 0 100 h 0 800 v 0 100 h 0 -800 v 0 100 h 0 400 v 0 100").attr({fill:"none", stroke:"#bbbcc0", strokeWidth:"30"});
+
+var circle = s.circle(150,150,5).attr({ fill: '#818286', opacity: 0 });
+var circle2 = circle.clone();
+
+function drawRect( el ) {
+  el.drawAtPath( path, 40000, { callback: drawRect.bind(null, el) } );
+};
+
+for( var x = 0; x < 100; x++ ) {
+  setTimeout( function() { drawRect( circle.clone().attr({ opacity: 1 }) ) }, x*10);
+};
+
+
+  };
+  </script>
+</head>
+<body>
+<svg id="pipe"></svg>
+</body>
+</html>
